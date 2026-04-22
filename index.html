@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CaptionForge — AI Subtitles Burned Into Your Video in 60 Seconds</title>
+  <meta name="description"
+    content="Upload your video. CaptionForge's Whisper AI transcribes every word and permanently burns pixel-perfect, timed subtitles directly into your file. No editors. No guesswork. Just results." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@600;800&family=Poppins:wght@600;800&family=Roboto:wght@500;700&family=Open+Sans:wght@600;800&family=Lato:wght@700;900&family=Bebas+Neue&family=Playfair+Display:wght@700;900&family=Cinzel:wght@700;900&family=Oswald:wght@500;700&family=Pacifico&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { inter: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
+              300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6',
+              600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
+            },
+          },
+          animation: {
+            'fade-up': 'fadeUp 0.7s ease forwards',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4,0,0.6,1) infinite',
+            'shimmer': 'shimmer 2.5s linear infinite',
+          },
+          keyframes: {
+            fadeUp: { '0%': { opacity: 0, transform: 'translateY(24px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
+            shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- JSON-LD Schema Markup — SoftwareApplication (schema.org) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "CaptionForge",
+    "url": "https://captionforge.app",
+    "logo": "https://captionforge.app/logo.png",
+    "description": "AI-powered subtitle burning tool. Upload any video and get accurate, timed, permanently burned-in subtitles using OpenAI Whisper and FFmpeg.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Web",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Free",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "3 minutes of video processing per month, up to 200 MB per file."
+      },
+      {
+        "@type": "Offer",
+        "name": "Pro",
+        "price": "19",
+        "priceCurrency": "USD",
+        "description": "120 minutes of video processing per month, up to 4 GB per file."
+      },
+      {
+        "@type": "Offer",
+        "name": "Enterprise",
+        "price": "79",
+        "priceCurrency": "USD",
+        "description": "Unlimited video processing, API access, priority queue, and team seats."
+      }
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "1284"
+    }
+  }
+  </script>
+
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Glassmorphism */
+    .glass {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .glass-strong {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px);
+    }
+
+    /* Gradient text */
+    .text-gradient {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Animated glow orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed rgba(59, 130, 246, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.06);
+      transform: scale(1.01);
+    }
+
+    /* Shimmer button */
+    .btn-shimmer {
+      background: linear-gradient(90deg, #2563eb, #6d28d9, #2563eb);
+      background-size: 200% auto;
+      animation: shimmer 2.5s linear infinite;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-shimmer:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+    }
+
+    /* Pricing card highlight */
+    .pricing-popular {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(109, 40, 217, 0.15));
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+
+    /* Feature card hover */
+    .feature-card {
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 0 30px rgba(59, 130, 246, 0.08);
+    }
+
+    /* Step number */
+    .step-num {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Testimonial card */
+    .testimonial-card {
+      transition: transform 0.25s ease;
+    }
+
+    .testimonial-card:hover {
+      transform: translateY(-3px);
+    }
+
+    /* Scroll animation helpers */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .float-anim {
+      animation: float 5s ease-in-out infinite;
+    }
+
+    /* Custom scrollbar for font selectors */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.3);
+      border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(59, 130, 246, 0.6);
+    }
+
+    .gold-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(245, 158, 11, 0.3);
+    }
+
+    .gold-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(245, 158, 11, 0.6);
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 antialiased overflow-x-hidden">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  NAVBAR                                                        -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
+    <nav class="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+      <a href="#" class="flex items-center gap-2.5 text-white font-bold text-xl tracking-tight">
+        <img src="logo.png" alt="CaptionForge Logo"
+          class="w-8 h-8 rounded-xl shadow-lg shadow-blue-500/20 object-cover border border-white/10" />
+        CaptionForge
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm text-slate-400">
+        <a href="#features" class="hover:text-white transition-colors duration-200">Features</a>
+        <a href="#how-it-works" class="hover:text-white transition-colors duration-200">How It Works</a>
+        <a href="#pricing" class="hover:text-white transition-colors duration-200">Pricing</a>
+        <a href="#testimonials" class="hover:text-white transition-colors duration-200">Reviews</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="#signup"
+          class="hidden sm:block text-sm text-slate-400 hover:text-white transition-colors duration-200">Sign in</a>
+        <a id="nav-cta" href="#hero-form" class="btn-shimmer text-white text-sm font-semibold px-5 py-2.5 rounded-xl">
+          Start Free →
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  HERO SECTION (Above-the-fold CRO)                            -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section class="relative min-h-screen flex flex-col items-center justify-center pt-24 pb-20 px-6 overflow-hidden">
+
+    <!-- Background orbs -->
+    <div class="orb w-[600px] h-[600px] bg-blue-600 top-[-15%] left-[-10%]"></div>
+    <div class="orb w-[500px] h-[500px] bg-violet-600 top-[20%] right-[-10%]"></div>
+    <div class="orb w-[400px] h-[400px] bg-emerald-500 bottom-[-5%] left-[20%]"></div>
+
+    <!-- Badge -->
+    <div class="mb-6 flex items-center gap-2 glass rounded-full px-4 py-2 text-sm text-slate-300 reveal">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      Powered by OpenAI Whisper · Used by 12,000+ creators
+    </div>
+
+    <!-- Headline (copywriting: pain → dream outcome) -->
+    <h1 class="text-center text-5xl sm:text-6xl lg:text-7xl font-black leading-none tracking-tight max-w-5xl reveal"
+      style="transition-delay:0.1s">
+      Stop Losing Views to<br />
+      <span class="text-gradient">Silent Videos.</span>
+    </h1>
+
+    <p class="mt-6 text-center text-lg sm:text-xl text-slate-400 max-w-2xl leading-relaxed reveal"
+      style="transition-delay:0.2s">
+      CaptionForge uses Whisper AI to transcribe every word and <strong class="text-slate-200">permanently burn
+        pixel-perfect subtitles</strong> into your video — in under 60 seconds. No editors. No timecodes. No headaches.
+    </p>
+
+    <!-- CRO: Drop zone email capture above the fold -->
+    <div id="hero-form" class="mt-12 w-full max-w-2xl reveal" style="transition-delay:0.3s">
+      <div id="drop-zone"
+        class="drop-zone glass-strong rounded-2xl p-10 text-center cursor-pointer transition-all duration-300">
+        <div class="float-anim mb-4 flex justify-center text-blue-400"><i data-lucide="clapperboard"
+            class="w-12 h-12"></i></div>
+        <p class="text-white font-semibold text-lg">Drop your video here (Early Access)</p>
+        <p class="text-slate-400 text-sm mt-1 mb-5">MP4, MOV, AVI, MKV up to 200 MB · First <strong
+            class="text-blue-400">3 minutes are free</strong> to celebrate Launch Week!</p>
+
+        <!-- Font Selector (Enhanced with Gold Premium & Combinations) -->
+        <div class="mb-8 w-full flex flex-col gap-5">
+
+          <!-- Main Font Section -->
+          <div class="bg-slate-900/40 p-5 rounded-2xl border border-white/5 shadow-inner">
+            <div class="flex items-center justify-between mb-4 text-left">
+              <p class="text-slate-200 text-sm font-bold tracking-wide">1. Main Subtitle Font</p>
+              <span class="text-xs text-slate-500">Pick your core style</span>
+            </div>
+            <div class="pr-2 max-h-48 overflow-y-auto custom-scrollbar grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+              <!-- Free Fonts -->
+              <button
+                class="font-btn inline-flex active hover:border-blue-500 border border-blue-500 bg-blue-500/15 rounded-xl py-2.5 px-3 text-sm text-white transition-all font-inter shadow-[0_0_15px_rgba(59,130,246,0.3)] truncate"
+                data-font="Arial" onclick="selectFont('main', this, false, 'Arial', event)">Arial</button>
+              <button
+                class="font-btn hover:border-slate-500 border border-slate-700 bg-slate-800/80 rounded-xl py-2.5 px-3 text-sm text-slate-300 transition-all font-bold tracking-widest uppercase truncate"
+                style="font-family: Impact, sans-serif;" data-font="Impact"
+                onclick="selectFont('main', this, false, 'Impact', event)">Impact</button>
+              <button
+                class="font-btn hover:border-slate-500 border border-slate-700 bg-slate-800/80 rounded-xl py-2.5 px-3 text-sm text-slate-300 transition-all truncate"
+                style="font-family: 'Roboto', sans-serif; font-weight: 700;" data-font="Roboto"
+                onclick="selectFont('main', this, false, 'Roboto', event)">Roboto</button>
+              <button
+                class="font-btn hover:border-slate-500 border border-slate-700 bg-slate-800/80 rounded-xl py-2.5 px-3 text-sm text-slate-300 transition-all truncate"
+                style="font-family: 'Open Sans', sans-serif; font-weight: 800;" data-font="Open Sans"
+                onclick="selectFont('main', this, false, 'Open Sans', event)">Open Sans</button>
+              <button
+                class="font-btn hover:border-slate-500 border border-slate-700 bg-slate-800/80 rounded-xl py-2.5 px-3 text-sm text-slate-300 transition-all truncate"
+                style="font-family: 'Lato', sans-serif; font-weight: 900;" data-font="Lato"
+                onclick="selectFont('main', this, false, 'Lato', event)">Lato</button>
+
+              <!-- Premium Fonts (Encoded in Gold) -->
+              <button
+                class="font-btn hover:border-amber-400 border border-amber-600/40 bg-gradient-to-br from-amber-600/10 to-amber-900/20 rounded-xl py-2 px-3 text-sm text-amber-500 transition-all flex items-center justify-center gap-1 cursor-not-allowed group relative shadow-[0_0_10px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] truncate"
+                style="font-family: 'Montserrat', sans-serif; font-weight: 800;" data-font="Montserrat"
+                onclick="selectFont('main', this, true, 'Montserrat', event)">
+                Montserrat <i data-lucide="lock" class="w-3 h-3 ml-1 inline-block opacity-70 mb-0.5"></i>
+              </button>
+              <button
+                class="font-btn hover:border-amber-400 border border-amber-600/40 bg-gradient-to-br from-amber-600/10 to-amber-900/20 rounded-xl py-2 px-3 text-sm text-amber-500 transition-all flex items-center justify-center gap-1 cursor-not-allowed group relative shadow-[0_0_10px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] truncate"
+                style="font-family: 'Poppins', sans-serif; font-weight: 800;" data-font="Poppins"
+                onclick="selectFont('main', this, true, 'Poppins', event)">
+                Poppins <i data-lucide="lock" class="w-3 h-3 ml-1 inline-block opacity-70 mb-0.5"></i>
+              </button>
+              <button
+                class="font-btn hover:border-amber-400 border border-amber-600/40 bg-gradient-to-br from-amber-600/10 to-amber-900/20 rounded-xl py-2 px-3 text-sm text-amber-500 transition-all flex items-center justify-center gap-1 cursor-not-allowed group relative shadow-[0_0_10px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] truncate"
+                style="font-family: 'Bebas Neue', sans-serif;" data-font="Bebas Neue"
+                onclick="selectFont('main', this, true, 'Bebas Neue', event)">
+                Bebas Neue <i data-lucide="lock" class="w-3 h-3 ml-1 inline-block opacity-70 mb-0.5"></i>
+              </button>
+              <button
+                class="font-btn hover:border-amber-400 border border-amber-600/40 bg-gradient-to-br from-amber-600/10 to-amber-900/20 rounded-xl py-2 px-3 text-sm text-amber-500 transition-all flex items-center justify-center gap-1 cursor-not-allowed group relative shadow-[0_0_10px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] truncate"
+                style="font-family: 'Cinzel', serif; font-weight: 900;" data-font="Cinzel"
+                onclick="selectFont('main', this, true, 'Cinzel', event)">
+                Cinzel <i data-lucide="lock" class="w-3 h-3 ml-1 inline-block opacity-70 mb-0.5"></i>
+              </button>
+              <button
+                class="font-btn hover:border-amber-400 border border-amber-600/40 bg-gradient-to-br from-amber-600/10 to-amber-900/20 rounded-xl py-2 px-3 text-sm text-amber-500 transition-all flex items-center justify-center gap-1 cursor-not-allowed group relative shadow-[0_0_10px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] truncate"
+                style="font-family: 'Playfair Display', serif; font-weight: 900;" data-font="Playfair Display"
+                onclick="selectFont('main', this, true, 'Playfair Display', event)">
+                Playfair <i data-lucide="lock" class="w-3 h-3 ml-1 inline-block opacity-70 mb-0.5"></i>
+              </button>
+              <button
+                class="font-btn hover:border-amber-400 border border-amber-600/40 bg-gradient-to-br from-amber-600/10 to-amber-900/20 rounded-xl py-2 px-3 text-sm text-amber-500 transition-all flex items-center justify-center gap-1 cursor-not-allowed group relative shadow-[0_0_10px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] truncate"
+                style="font-family: 'Oswald', sans-serif; font-weight: 700;" data-font="Oswald"
+                onclick="selectFont('main', this, true, 'Oswald', event)">
+                Oswald <i data-lucide="lock" class="w-3 h-3 ml-1 inline-block opacity-70 mb-0.5"></i>
+              </button>
+              <button
+                class="font-btn hover:border-amber-400 border border-amber-600/40 bg-gradient-to-br from-amber-600/10 to-amber-900/20 rounded-xl py-2 px-3 text-sm text-amber-500 transition-all flex items-center justify-center gap-1 cursor-not-allowed group relative shadow-[0_0_10px_rgba(245,158,11,0.05)] hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] truncate"
+                style="font-family: 'Pacifico', cursive;" data-font="Pacifico"
+                onclick="selectFont('main', this, true, 'Pacifico', event)">
+                Pacifico <i data-lucide="lock" class="w-3 h-3 ml-1 inline-block opacity-70 mb-0.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Highlight Font Section (Font Combination) -->
+          <div
+            class="bg-gradient-to-br from-slate-900/80 to-slate-900/40 p-5 rounded-2xl border border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.05)] relative overflow-hidden">
+            <div
+              class="absolute top-0 right-0 bg-gradient-to-l from-amber-500/10 to-transparent w-40 h-full pointer-events-none">
+            </div>
+            <div class="flex items-center justify-between mb-4 text-left relative z-10">
+              <p class="text-amber-400 text-sm font-bold tracking-wide flex items-center gap-2">
+                2. Highlight Font <span
+                  class="text-[10px] bg-amber-500/10 border border-amber-500/30 px-2.5 flex items-center py-0.5 rounded-full text-amber-300 font-black uppercase tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.3)]"><i
+                    data-lucide="sparkles" class="w-3 h-3 mr-1 inline-block"></i>PRO MIX</span>
+              </p>
+              <span class="text-xs text-slate-400">Emphasize key words</span>
+            </div>
+            <div
+              class="pr-2 max-h-32 overflow-y-auto custom-scrollbar gold-scrollbar grid grid-cols-2 lg:grid-cols-4 gap-2.5 relative z-10">
+              <button
+                class="font-btn hlight hover:border-amber-400 border border-amber-500/30 bg-amber-900/10 rounded-xl py-2 px-3 text-sm text-amber-400/70 transition-all flex items-center justify-center gap-1 cursor-not-allowed"
+                style="font-family: 'Bebas Neue', sans-serif;"
+                onclick="selectFont('highlight', this, true, 'Bebas Neue', event)">Bebas Neue <i data-lucide="lock"
+                  class="w-3 h-3 ml-1.5 inline-block opacity-70 mb-0.5"></i></button>
+              <button
+                class="font-btn hlight hover:border-amber-400 border border-amber-500/30 bg-amber-900/10 rounded-xl py-2 px-3 text-sm text-amber-400/70 transition-all flex items-center justify-center gap-1 cursor-not-allowed"
+                style="font-family: 'Cinzel', serif; font-weight: 900;"
+                onclick="selectFont('highlight', this, true, 'Cinzel', event)">Cinzel <i data-lucide="lock"
+                  class="w-3 h-3 ml-1.5 inline-block opacity-70 mb-0.5"></i></button>
+              <button
+                class="font-btn hlight hover:border-amber-400 border border-amber-500/30 bg-amber-900/10 rounded-xl py-2 px-3 text-sm text-amber-400/70 transition-all flex items-center justify-center gap-1 cursor-not-allowed"
+                style="font-family: 'Pacifico', cursive;"
+                onclick="selectFont('highlight', this, true, 'Pacifico', event)">Pacifico <i data-lucide="lock"
+                  class="w-3 h-3 ml-1.5 inline-block opacity-70 mb-0.5"></i></button>
+              <button
+                class="font-btn hlight hover:border-amber-400 border border-amber-500/30 bg-amber-900/10 rounded-xl py-2 px-3 text-sm text-amber-400/70 transition-all flex items-center justify-center gap-1 cursor-not-allowed"
+                style="font-family: Impact, sans-serif;"
+                onclick="selectFont('highlight', this, true, 'Impact', event)">Impact <i data-lucide="lock"
+                  class="w-3 h-3 ml-1.5 inline-block opacity-70 mb-0.5"></i></button>
+            </div>
+          </div>
+
+          <p id="font-toast"
+            class="hidden text-amber-300 text-xs mt-1 text-center animate-fade-up font-bold flex items-center justify-center gap-2 bg-amber-500/10 border border-amber-500/30 py-3 rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+            <i data-lucide="crown" class="w-5 h-5 text-amber-500 inline-block"></i> Premium gold typography and font
+            mixing are available
+            exclusively on the Pro plan.
+          </p>
+        </div>
+
+        <input type="file" id="video-upload" accept="video/*" class="hidden" />
+        <button onclick="document.getElementById('video-upload').click()"
+          class="btn-shimmer text-white font-bold px-8 py-3.5 rounded-xl text-base inline-flex items-center justify-center gap-2">
+          <i data-lucide="zap" class="w-5 h-5 fill-white"></i> Subtitle My Video — It's Free
+        </button>
+      </div>
+
+      <!-- UI Progress Bar Container (Hidden by default) -->
+      <div id="upload-status" class="hidden mt-6 glass rounded-2xl p-6 text-center">
+        <h3 id="status-text" class="text-white font-semibold text-lg mb-2">Uploading Video...</h3>
+        <p id="status-detail" class="text-slate-400 text-sm mb-4">Securing your file. Please do not close this tab.</p>
+        <div class="w-full bg-slate-800 rounded-full h-2 mb-4">
+          <div id="progress-bar"
+            class="bg-gradient-to-r from-blue-500 to-violet-500 h-2 rounded-full transition-all duration-300"
+            style="width: 5%"></div>
+        </div>
+        <div id="download-container" class="hidden mt-6 flex flex-col sm:flex-row gap-3 w-full">
+          <a id="download-btn-video" href="#" download
+            class="btn-shimmer text-white font-bold px-6 py-3.5 rounded-xl text-sm w-full inline-flex items-center justify-center gap-2">
+            <i data-lucide="download" class="w-4 h-4"></i> Download Burned Video
+          </a>
+          <a id="download-btn-srt" href="#" download
+            class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-colors duration-200 font-bold px-6 py-3.5 rounded-xl text-sm w-full inline-flex items-center justify-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4"></i> Download .SRT File
+          </a>
+        </div>
+      </div>
+
+      <!-- Email fallback capture -->
+      <div class="mt-4 glass rounded-xl p-4 flex flex-col sm:flex-row gap-3 items-center">
+        <span class="text-slate-500 text-sm whitespace-nowrap">Or get early access:</span>
+        <input id="email-input" type="email" placeholder="yourname@email.com"
+          class="flex-1 bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all w-full" />
+        <button id="email-cta"
+          class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25 whitespace-nowrap w-full sm:w-auto">
+          Get Free Access →
+        </button>
+      </div>
+      <p class="text-center text-slate-600 text-xs mt-3">No credit card. No account needed to try. Your files are
+        deleted after processing.</p>
+    </div>
+
+    <!-- Social proof numbers -->
+    <div class="mt-16 flex flex-wrap justify-center gap-10 reveal" style="transition-delay:0.4s">
+      <div class="text-center">
+        <p class="text-3xl font-bold text-white">12,000+</p>
+        <p class="text-slate-500 text-sm mt-1">Videos processed</p>
+      </div>
+      <div class="w-px bg-slate-800 hidden sm:block"></div>
+      <div class="text-center">
+        <p class="text-3xl font-bold text-white">99.2%</p>
+        <p class="text-slate-500 text-sm mt-1">Transcription accuracy</p>
+      </div>
+      <div class="w-px bg-slate-800 hidden sm:block"></div>
+      <div class="text-center">
+        <p class="text-3xl font-bold text-white">&lt; 90s</p>
+        <p class="text-slate-500 text-sm mt-1">Average processing time</p>
+      </div>
+      <div class="w-px bg-slate-800 hidden sm:block"></div>
+      <div class="text-center">
+        <p class="text-3xl font-bold text-white">4.9 ★</p>
+        <p class="text-slate-500 text-sm mt-1">Average rating</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  TRUST/LOGO STRIP                                             -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section class="py-12 border-y border-white/5 bg-slate-950/80">
+    <div class="max-w-6xl mx-auto px-6">
+      <p class="text-center text-slate-600 text-sm uppercase tracking-widest mb-8 font-medium">Trusted by creators,
+        agencies &amp; enterprises</p>
+      <div class="flex flex-wrap justify-center items-center gap-10 opacity-40 grayscale">
+        <span class="text-2xl font-black text-white tracking-tight">VEED.IO</span>
+        <span class="text-2xl font-black text-white tracking-tight">Descript</span>
+        <span class="text-2xl font-black text-white tracking-tight">TikTok</span>
+        <span class="text-2xl font-black text-white tracking-tight">Wistia</span>
+        <span class="text-2xl font-black text-white tracking-tight">HubSpot</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  PAIN POINT / FEATURES (ad-creative + copywriting framework)  -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section id="features" class="py-28 px-6 max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-blue-400 font-semibold text-sm uppercase tracking-widest mb-3">Why CaptionForge</p>
+      <h2 class="text-4xl sm:text-5xl font-black text-white leading-tight">
+        Every Minute You Wait, <br class="hidden sm:block" />
+        <span class="text-gradient">Someone Scrolls Past.</span>
+      </h2>
+      <p class="mt-4 text-slate-400 max-w-2xl mx-auto text-lg">85% of social videos are watched on mute. If your video
+        has no captions, you've already lost the viewer — before they even hear your voice.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Pain 1 → Solution -->
+      <div class="feature-card glass rounded-2xl p-7 reveal">
+        <div class="mb-4 text-blue-400"><i data-lucide="timer" class="w-8 h-8"></i></div>
+        <h3 class="text-xl font-bold text-white mb-2">Stop Wasting 3+ Hours Per Video</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Manually timing captions in Premiere or DaVinci? That's a full
+          afternoon gone. CaptionForge processes and burns in subtitles automatically — in under 90 seconds.</p>
+      </div>
+
+      <!-- Pain 2 → Solution -->
+      <div class="feature-card glass rounded-2xl p-7 reveal" style="transition-delay:0.1s">
+        <div class="mb-4 text-blue-400"><i data-lucide="crosshair" class="w-8 h-8"></i></div>
+        <h3 class="text-xl font-bold text-white mb-2">99.2% Accurate. Not "Close Enough."</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">OpenAI's Whisper is the most accurate open-source
+          transcription model on the planet. Trained on 680,000 hours of multilingual audio. Your captions will actually
+          match what you said.</p>
+      </div>
+
+      <!-- Pain 3 → Solution -->
+      <div class="feature-card glass rounded-2xl p-7 reveal" style="transition-delay:0.2s">
+        <div class="mb-4 text-blue-400"><i data-lucide="flame" class="w-8 h-8"></i></div>
+        <h3 class="text-xl font-bold text-white mb-2">Hard-Burned In. Universally Visible.</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">No soft SRT overlays that disappear on download. CaptionForge
+          uses FFmpeg to permanently embed subtitles into every single pixel of your video — on any platform, forever.
+        </p>
+      </div>
+
+      <!-- Pain 4 → Solution -->
+      <div class="feature-card glass rounded-2xl p-7 reveal" style="transition-delay:0.3s">
+        <div class="mb-4 text-blue-400"><i data-lucide="globe" class="w-8 h-8"></i></div>
+        <h3 class="text-xl font-bold text-white mb-2">50+ Languages Supported</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Spanish, French, Arabic, Mandarin, Hindi — Whisper handles
+          them all. Reach global audiences without hiring a single translator.</p>
+      </div>
+
+      <!-- Pain 5 → Solution -->
+      <div class="feature-card glass rounded-2xl p-7 reveal" style="transition-delay:0.4s">
+        <div class="mb-4 text-blue-400"><i data-lucide="folder-output" class="w-8 h-8"></i></div>
+        <h3 class="text-xl font-bold text-white mb-2">SRT Export Included Free</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">Every job generates a perfectly timed .srt file alongside your
+          burned video. Upload it anywhere — YouTube, LinkedIn, Facebook — with a single click.</p>
+      </div>
+
+      <!-- Pain 6 → Solution -->
+      <div class="feature-card glass rounded-2xl p-7 reveal" style="transition-delay:0.5s">
+        <div class="mb-4 text-blue-400"><i data-lucide="shield-check" class="w-8 h-8"></i></div>
+        <h3 class="text-xl font-bold text-white mb-2">Your Files Are Never Stored</h3>
+        <p class="text-slate-400 text-sm leading-relaxed">We process your video in a sandboxed environment and delete
+          every file the moment your download is ready. Your content stays yours — always.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  HOW IT WORKS (3 steps)                                       -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section id="how-it-works" class="py-24 px-6 bg-slate-900/40 border-y border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 reveal">
+        <p class="text-violet-400 font-semibold text-sm uppercase tracking-widest mb-3">Dead Simple</p>
+        <h2 class="text-4xl sm:text-5xl font-black text-white">From Upload to Download<br /> in 3 Steps.</h2>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-8 relative">
+        <!-- Connector line (desktop) -->
+        <div
+          class="hidden sm:block absolute top-10 left-1/6 right-1/6 h-px bg-gradient-to-r from-blue-600/0 via-blue-500/40 to-violet-500/0">
+        </div>
+
+        <div class="text-center reveal">
+          <div class="text-7xl font-black step-num mb-4">01</div>
+          <div class="mb-3 flex justify-center text-blue-400"><i data-lucide="cloud-upload" class="w-10 h-10"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2">Upload Your Video</h3>
+          <p class="text-slate-400 text-sm">Drag-and-drop or browse. MP4, MKV, MOV, AVI — we handle them all up to 4 GB.
+          </p>
+        </div>
+
+        <div class="text-center reveal" style="transition-delay:0.15s">
+          <div class="text-7xl font-black step-num mb-4">02</div>
+          <div class="mb-3 flex justify-center text-blue-400"><i data-lucide="bot" class="w-10 h-10"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2">AI Transcribes &amp; Times</h3>
+          <p class="text-slate-400 text-sm">Whisper AI analyzes every syllable, generates precise timecodes and an SRT
+            file — automatically.</p>
+        </div>
+
+        <div class="text-center reveal" style="transition-delay:0.3s">
+          <div class="text-7xl font-black step-num mb-4">03</div>
+          <div class="mb-3 flex justify-center text-blue-400"><i data-lucide="download-cloud" class="w-10 h-10"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Download Burned Video</h3>
+          <p class="text-slate-400 text-sm">FFmpeg permanently embeds your subtitles. Download your finished video and
+            post immediately.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  PRICING TABLE (psychological anchoring — @pricing-strategy)  -->
+  <!--  Anchor: Enterprise shown first. Pro highlighted as "Popular"  -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section id="pricing" class="py-28 px-6 max-w-7xl mx-auto">
+    <div class="text-center mb-14 reveal">
+      <p class="text-emerald-400 font-semibold text-sm uppercase tracking-widest mb-3">Pricing</p>
+      <h2 class="text-4xl sm:text-5xl font-black text-white">One Price. <span class="text-gradient">Infinite
+          Captions.</span></h2>
+      <p class="text-slate-400 mt-4 max-w-xl mx-auto">Start for free. Upgrade whenever. No surprise charges — ever.</p>
+    </div>
+
+    <!-- Toggle Annual / Monthly -->
+    <div class="flex items-center justify-center gap-3 mb-12 reveal">
+      <span class="text-slate-400 text-sm">Monthly</span>
+      <label class="relative inline-flex cursor-pointer items-center">
+        <input id="billing-toggle" type="checkbox" class="peer sr-only" />
+        <div
+          class="w-12 h-6 rounded-full bg-slate-700 peer-checked:bg-blue-600 transition-colors duration-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:rounded-full after:bg-white after:transition-transform after:duration-300 peer-checked:after:translate-x-6">
+        </div>
+      </label>
+      <span class="text-slate-400 text-sm">Annual <span class="text-emerald-400 font-semibold ml-1">Save
+          25%</span></span>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 items-start">
+
+      <!-- Tier 1: Free (anchor exists — looks limited next to Pro) -->
+      <div class="glass rounded-2xl p-8 reveal">
+        <p class="text-slate-400 text-sm font-medium uppercase tracking-widest mb-2">Free</p>
+        <div class="flex items-end gap-1 mb-1">
+          <span class="text-5xl font-black text-white">$0</span>
+        </div>
+        <p class="text-slate-500 text-sm mb-6">Forever free. No card needed.</p>
+        <ul class="space-y-3 mb-8 text-sm">
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300"><strong>3 minutes</strong> of video / month</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">Max upload: 200 MB</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">SRT file export</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">1 language</span></li>
+          <li class="flex items-start gap-2"><span class="text-slate-600 mt-0.5">✕</span> <span
+              class="text-slate-600">Custom font / style</span></li>
+          <li class="flex items-start gap-2"><span class="text-slate-600 mt-0.5">✕</span> <span
+              class="text-slate-600">Priority processing queue</span></li>
+          <li class="flex items-start gap-2"><span class="text-slate-600 mt-0.5">✕</span> <span
+              class="text-slate-600">API access</span></li>
+        </ul>
+        <a href="#hero-form"
+          class="block text-center border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-semibold py-3 rounded-xl transition-all duration-200">
+          Get Started Free
+        </a>
+      </div>
+
+      <!-- Tier 2: Pro — MOST POPULAR (highlighted, anchored) -->
+      <div class="pricing-popular rounded-2xl p-8 relative reveal" style="transition-delay:0.1s">
+        <div
+          class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-violet-600 text-white text-xs font-bold px-5 py-1.5 rounded-full uppercase tracking-wider shadow-lg">
+          Most Popular
+        </div>
+        <p class="text-blue-400 text-sm font-medium uppercase tracking-widest mb-2">Pro</p>
+        <div class="flex items-end gap-1 mb-1">
+          <span class="text-5xl font-black text-white" id="pro-price">$19</span>
+          <span class="text-slate-400 text-sm pb-2">/month</span>
+        </div>
+        <p class="text-slate-400 text-sm mb-6">For creators who post consistently.</p>
+        <ul class="space-y-3 mb-8 text-sm">
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-200"><strong>120 minutes</strong> of video / month</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-200">Max upload: 4 GB</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-200">SRT + burned-in video export</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-200">50+ languages</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-200">Custom font, color &amp; position</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-200">Priority processing queue</span></li>
+          <li class="flex items-start gap-2"><span class="text-slate-600 mt-0.5">✕</span> <span
+              class="text-slate-500">API access</span></li>
+        </ul>
+        <a href="http://buy.stripe.com/test_28EbJ36SR2gh2Jb2Ub4c800" target="_blank" rel="noopener noreferrer"
+          class="block text-center btn-shimmer text-white font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-blue-900/40">
+          Start Pro Free — 14 Days
+        </a>
+        <p class="text-center text-slate-600 text-xs mt-2">Cancel anytime. No commitment.</p>
+      </div>
+
+      <!-- Tier 3: Enterprise (anchor — makes Pro look affordable) -->
+      <div class="glass rounded-2xl p-8 reveal" style="transition-delay:0.2s">
+        <p class="text-violet-400 text-sm font-medium uppercase tracking-widest mb-2">Enterprise</p>
+        <div class="flex items-end gap-1 mb-1">
+          <span class="text-5xl font-black text-white" id="ent-price">$79</span>
+          <span class="text-slate-400 text-sm pb-2">/month</span>
+        </div>
+        <p class="text-slate-500 text-sm mb-6">For agencies, studios &amp; teams.</p>
+        <ul class="space-y-3 mb-8 text-sm">
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300"><strong>Unlimited</strong> minutes</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">Max upload: Unlimited</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">All Pro features</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">REST API access</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">Up to 10 team seats</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">Dedicated support SLA</span></li>
+          <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">✓</span> <span
+              class="text-slate-300">SSO &amp; custom branding</span></li>
+        </ul>
+        <a href="javascript:void(0)" onclick="openContactModal(event)"
+          class="block text-center border border-violet-500/40 hover:border-violet-400 text-violet-300 hover:text-white font-semibold py-3 rounded-xl transition-all duration-200">
+          Contact Sales
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  TESTIMONIALS                                                  -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section id="testimonials" class="py-24 px-6 bg-slate-900/30 border-y border-white/5">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14 reveal">
+        <h2 class="text-4xl font-black text-white">Creators Love It.</h2>
+        <p class="text-slate-400 mt-3">Don't take our word for it — here's what they're saying.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="testimonial-card glass rounded-2xl p-6 reveal">
+          <div class="flex gap-0.5 text-yellow-400 mb-4">
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+          </div>
+          <p class="text-slate-300 text-sm leading-relaxed mb-5">"I used to spend 3 hours per YouTube video adding
+            captions in Premiere. CaptionForge does it in 90 seconds and the accuracy is wild. It's my #1 tool now."</p>
+          <div class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
+              M</div>
+            <div>
+              <p class="text-white font-semibold text-sm">Marcus T.</p>
+              <p class="text-slate-500 text-xs">YouTube Creator · 340K subs</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card glass rounded-2xl p-6 reveal" style="transition-delay:0.1s">
+          <div class="flex gap-0.5 text-yellow-400 mb-4">
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+          </div>
+          <p class="text-slate-300 text-sm leading-relaxed mb-5">"We run a social media agency and CaptionForge is the
+            only reason we can turn around captioned reels in under an hour. The Enterprise API is a game changer."</p>
+          <div class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm">
+              S</div>
+            <div>
+              <p class="text-white font-semibold text-sm">Sophia R.</p>
+              <p class="text-slate-500 text-xs">Founder · ContentLab Agency</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card glass rounded-2xl p-6 reveal" style="transition-delay:0.2s">
+          <div class="flex gap-0.5 text-yellow-400 mb-4">
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i>
+          </div>
+          <p class="text-slate-300 text-sm leading-relaxed mb-5">"My TikToks went from 2k avg to 18k avg views after I
+            started captioning everything. Mute viewers finally stay. Insane ROI for $19/month."</p>
+          <div class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white font-bold text-sm">
+              A</div>
+            <div>
+              <p class="text-white font-semibold text-sm">Aisha K.</p>
+              <p class="text-slate-500 text-xs">TikTok Creator · 1.2M followers</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  FINAL CTA                                                     -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section id="signup" class="py-32 px-6 text-center relative overflow-hidden">
+    <div class="orb w-[700px] h-[700px] bg-blue-700 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10">
+    </div>
+    <div class="relative max-w-3xl mx-auto reveal">
+      <h2 class="text-5xl sm:text-6xl font-black text-white leading-tight mb-6">
+        Your Next Video<br />
+        <span class="text-gradient">Deserves to Be Heard.</span>
+      </h2>
+      <p class="text-slate-400 text-xl mb-10 max-w-xl mx-auto">Get your first 3 minutes subtitled absolutely free. No
+        credit card. No setup. Just drop your video and watch the magic happen.</p>
+      <a href="#hero-form"
+        class="btn-shimmer inline-flex items-center gap-2 text-white font-bold px-10 py-5 rounded-2xl text-lg shadow-2xl shadow-blue-900/40">
+        <i data-lucide="zap" class="w-5 h-5 fill-white"></i> Try CaptionForge Free — Start Now
+      </a>
+      <p class="text-slate-600 text-sm mt-4">Joins 12,000+ creators already captioning smarter.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  FOOTER                                                        -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <footer class="border-t border-white/5 py-12 px-6 bg-slate-950">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-10">
+      <div class="max-w-sm">
+        <div class="flex items-center gap-2.5 text-white font-bold text-xl mb-3">
+          <img src="logo.png" alt="CaptionForge Logo"
+            class="w-8 h-8 rounded-xl shadow-lg shadow-blue-500/20 object-cover border border-white/10" />
+          CaptionForge
+        </div>
+        <p class="text-slate-500 text-sm leading-relaxed">AI-powered subtitle burning for creators, agencies, and
+          enterprises. Powered by OpenAI Whisper &amp; FFmpeg.</p>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
+        <div>
+          <p class="text-white font-semibold mb-3">Product</p>
+          <ul class="space-y-2 text-slate-500">
+            <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+            <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+            <li><a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">API Docs</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-white font-semibold mb-3">Company</p>
+          <ul class="space-y-2 text-slate-500">
+            <li><a href="#" class="hover:text-white transition-colors">About</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+            <li><a href="javascript:void(0)" onclick="openContactModal(event)"
+                class="hover:text-white transition-colors">Contact Sales</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-white font-semibold mb-3">Legal</p>
+          <ul class="space-y-2 text-slate-500">
+            <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Cookie Policy</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div
+      class="max-w-7xl mx-auto mt-10 pt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between gap-3 text-xs text-slate-600">
+      <p>© 2026 CaptionForge. All rights reserved.</p>
+      <p>Built with OpenAI Whisper · FFmpeg · <i data-lucide="heart"
+          class="w-3 h-3 text-rose-500 fill-rose-500 inline-block align-text-bottom ml-0.5"></i></p>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  CONTACT SALES MODAL                                           -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="contact-modal"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="closeContactModal()"></div>
+    <div
+      class="relative glass-strong bg-slate-900/40 rounded-3xl w-full max-w-lg p-8 sm:p-10 shadow-2xl transform scale-95 transition-transform duration-300 border border-white/10"
+      id="contact-modal-body">
+      <button onclick="closeContactModal()"
+        class="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="mb-8">
+        <h3 class="text-2xl font-black text-white mb-2 flex items-center gap-2">
+          <i data-lucide="building-2" class="w-6 h-6 text-violet-400"></i> Enterprise Sales
+        </h3>
+        <p class="text-slate-400 text-sm">Automate at scale. Let's discuss custom API limits and SLA pricing for your
+          team.</p>
+      </div>
+
+      <form id="contact-form" class="space-y-4" onsubmit="submitContactForm(event)">
+        <input type="hidden" name="access_key" value="7e8c7f42-e8a3-4b10-911a-fb2d0ca81388" />
+        <input type="hidden" name="subject" value="New Enterprise Sales Inquiry - CaptionForge" />
+        <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">First Name</label>
+            <input type="text" name="first_name" required
+              class="w-full bg-slate-900/50 border border-slate-700/50 text-white rounded-lg px-4 py-3 placeholder-slate-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
+              placeholder="Alex" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Last Name</label>
+            <input type="text" name="last_name" required
+              class="w-full bg-slate-900/50 border border-slate-700/50 text-white rounded-lg px-4 py-3 placeholder-slate-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
+              placeholder="Smith" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Work Email</label>
+          <input type="email" name="email" required
+            class="w-full bg-slate-900/50 border border-slate-700/50 text-white rounded-lg px-4 py-3 placeholder-slate-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
+            placeholder="alex@company.com" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Company Size</label>
+          <select name="company_size"
+            class="w-full bg-slate-900/50 border border-slate-700/50 text-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors appearance-none cursor-pointer">
+            <option value="1-10">1-10 Employees</option>
+            <option value="11-50">11-50 Employees</option>
+            <option value="51-200">51-200 Employees</option>
+            <option value="201+">201+ Employees</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Message</label>
+          <textarea name="message" required rows="3"
+            class="w-full bg-slate-900/50 border border-slate-700/50 text-white rounded-lg px-4 py-3 placeholder-slate-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors resize-none"
+            placeholder="Tell us about your use case..."></textarea>
+        </div>
+
+        <button type="submit" id="contact-submit"
+          class="w-full mt-4 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-violet-500/25 transition-all flex items-center justify-center gap-2">
+          <span>Send Inquiry</span> <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  JAVASCRIPT                                                    -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <script>
+    // ── Reveal on scroll ──────────────────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ── Font Selector Logic ───────────────────────────────────────
+    let selectedMainFont = "Arial";
+    let selectedHighlightFont = null;
+
+    function selectFont(type, btn, isPremium, fontName, event) {
+      if (event) event.stopPropagation(); // prevent drag-drop wrapper clicks
+
+      const toast = document.getElementById('font-toast');
+      toast.classList.add('hidden');
+
+      // All Highlight fonts and Premium fonts require Pro plan
+      if (isPremium) {
+        toast.classList.remove('hidden');
+        return;
+      }
+
+      // Reset styles for the immediate grid container
+      const container = btn.closest('.grid');
+      container.querySelectorAll('.font-btn').forEach(el => {
+        // For Free Fonts, revert back to their idle slate styling
+        if (!el.classList.contains('text-amber-500')) {
+          el.classList.remove('border-blue-500', 'bg-blue-500/15', 'active', 'text-white', 'shadow-[0_0_15px_rgba(59,130,246,0.3)]');
+          el.classList.add('border-slate-700', 'bg-slate-800/80', 'text-slate-300');
+        }
+      });
+
+      // Set clicked free button to active state
+      btn.classList.remove('border-slate-700', 'bg-slate-800/80', 'text-slate-300');
+      btn.classList.add('border-blue-500', 'bg-blue-500/15', 'active', 'text-white', 'shadow-[0_0_15px_rgba(59,130,246,0.3)]');
+
+      if (type === 'main') {
+        selectedMainFont = fontName;
+      } else {
+        selectedHighlightFont = fontName;
+      }
+    }
+
+    // ── Drag-and-drop drop zone ───────────────────────────────────
+    const dz = document.getElementById('drop-zone');
+    ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+    dz.addEventListener('drop', e => {
+      const file = e.dataTransfer.files[0];
+      if (file) handleFileSelect(file);
+    });
+    document.getElementById('video-upload').addEventListener('change', e => {
+      if (e.target.files[0]) handleFileSelect(e.target.files[0]);
+    });
+
+    // ── API Integration (Upload + Polling) ──────────────────────────
+    async function handleFileSelect(file) {
+      const dz = document.getElementById('drop-zone');
+      const statusBox = document.getElementById('upload-status');
+      const statusText = document.getElementById('status-text');
+      const statusDetail = document.getElementById('status-detail');
+      const progressBar = document.getElementById('progress-bar');
+      const downloadContainer = document.getElementById('download-container');
+      const downloadBtn = document.getElementById('download-btn');
+
+      // UI Updates
+      dz.classList.add('hidden');
+      statusBox.classList.remove('hidden');
+
+      // Growth Hook: A/B Test / Launch Analytics
+      console.log("Analytics: Video Upload Event Triggered (Tier: Free)");
+
+      // 1. Upload Video
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("tier", "free"); // Tie into Pricing-Strategy
+      formData.append("font", selectedMainFont);
+      if (selectedHighlightFont) {
+        formData.append("highlight_font", selectedHighlightFont);
+      }
+
+      try {
+        progressBar.style.width = "30%";
+        statusText.textContent = "AI is Processing...";
+        statusDetail.textContent = "Uploading to secure servers...";
+
+        // Point this to the FastAPI Server (Port 8000)
+        const uploadRes = await fetch("http://localhost:8000/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!uploadRes.ok) throw new Error("Upload failed.");
+        const uploadData = await uploadRes.json();
+        const jobId = uploadData.job_id;
+
+        progressBar.style.width = "60%";
+        statusDetail.textContent = uploadData.message;
+
+        // 2. Poll for Status Long-Running Background Task
+        const pollInterval = setInterval(async () => {
+          try {
+            const statusRes = await fetch(`http://localhost:8000/status/${jobId}`);
+            if (!statusRes.ok) return;
+
+            const statusData = await statusRes.json();
+            statusDetail.textContent = statusData.progress || "Processing AI audio...";
+
+            if (statusData.status === "completed") {
+              clearInterval(pollInterval);
+              progressBar.style.width = "100%";
+              progressBar.classList.add('bg-emerald-500');
+              statusText.innerHTML = '<i data-lucide="party-popper" class="w-5 h-5 inline-block text-amber-500 align-text-bottom mr-1 mb-0.5"></i> Video Ready!';
+              statusDetail.textContent = "Your subtitles are permanently burned in.";
+              lucide.createIcons();
+
+              // Show Download Buttons
+              downloadContainer.classList.remove('hidden');
+
+              // Avoid memory blobs, directly link to files
+              const btnVideo = document.getElementById('download-btn-video');
+              const btnSrt = document.getElementById('download-btn-srt');
+
+              btnVideo.href = statusData.download_url || "#";
+              btnVideo.onclick = () => alert("Link accesses generated video from path!");
+
+              btnSrt.href = statusData.download_srt_url || "#";
+              btnSrt.onclick = () => alert("Link accesses generated .srt file from path!");
+
+              console.log("Analytics: Job Completed", statusData.marketing_event);
+            } else if (statusData.status === "error") {
+              clearInterval(pollInterval);
+              progressBar.classList.add('bg-red-500');
+              statusText.textContent = "Processing Failed";
+              statusDetail.textContent = statusData.error_message;
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        }, 3000);
+
+      } catch (error) {
+        statusText.textContent = "Error";
+        statusDetail.textContent = "Could not connect to the API server.";
+        progressBar.classList.add('bg-red-500');
+      }
+    }
+
+    // ── Annual/Monthly pricing toggle ─────────────────────────────
+    document.getElementById('billing-toggle').addEventListener('change', function () {
+      const proEl = document.getElementById('pro-price');
+      const entEl = document.getElementById('ent-price');
+      proEl.textContent = this.checked ? '$14' : '$19';
+      entEl.textContent = this.checked ? '$59' : '$79';
+    });
+
+    // ── Email CTA ─────────────────────────────────────────────────
+    document.getElementById('email-cta').addEventListener('click', () => {
+      const email = document.getElementById('email-input').value.trim();
+      if (!email || !email.includes('@')) {
+        document.getElementById('email-input').focus();
+        document.getElementById('email-input').classList.add('border-red-500');
+        return;
+      }
+      document.getElementById('email-cta').textContent = '🎉 You\'re on the list!';
+      document.getElementById('email-cta').classList.remove('bg-blue-600', 'hover:bg-blue-500');
+      lucide.createIcons();
+      document.getElementById('email-cta').classList.add('bg-emerald-600');
+    });
+
+    // ── Smooth navbar hide/show on scroll ─────────────────────────
+    let lastY = 0;
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      header.style.transform = (y > lastY && y > 100) ? 'translateY(-100%)' : 'translateY(0)';
+      header.style.transition = 'transform 0.3s ease';
+      lastY = y;
+    });
+
+    // ── Contact Modal Logic ───────────────────────────────────────
+    function openContactModal(e) {
+      if (e) e.preventDefault();
+      const modal = document.getElementById('contact-modal');
+      const body = document.getElementById('contact-modal-body');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      body.classList.remove('scale-95');
+      body.classList.add('scale-100');
+    }
+
+    function closeContactModal() {
+      const modal = document.getElementById('contact-modal');
+      const body = document.getElementById('contact-modal-body');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      body.classList.remove('scale-100');
+      body.classList.add('scale-95');
+    }
+
+    async function submitContactForm(e) {
+      e.preventDefault();
+      const btn = document.getElementById('contact-submit');
+      const form = e.target;
+      const originalText = btn.innerHTML;
+
+      // UI Loading state
+      btn.innerHTML = '<span>Sending...</span>';
+      btn.disabled = true;
+      btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+      try {
+        const formData = new FormData(form);
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Success State
+          btn.innerHTML = '<span>Sent Successfully</span> <i data-lucide="check" class="w-4 h-4"></i>';
+          btn.classList.replace('from-violet-600', 'from-emerald-600');
+          btn.classList.replace('to-blue-600', 'to-teal-600');
+          btn.classList.replace('hover:from-violet-500', 'hover:from-emerald-500');
+          btn.classList.replace('hover:to-blue-500', 'hover:to-teal-500');
+          btn.classList.replace('shadow-violet-500/25', 'shadow-emerald-500/25');
+          btn.classList.remove('opacity-75', 'cursor-not-allowed');
+          lucide.createIcons();
+
+          setTimeout(() => {
+            closeContactModal();
+            setTimeout(() => {
+              form.reset();
+              btn.innerHTML = '<span>Send Inquiry</span> <i data-lucide="send" class="w-4 h-4"></i>';
+              btn.classList.replace('from-emerald-600', 'from-violet-600');
+              btn.classList.replace('to-teal-600', 'to-blue-600');
+              btn.classList.replace('hover:from-emerald-500', 'hover:from-violet-500');
+              btn.classList.replace('hover:to-teal-500', 'hover:to-blue-500');
+              btn.classList.replace('shadow-emerald-500/25', 'shadow-violet-500/25');
+              btn.disabled = false;
+              lucide.createIcons();
+            }, 300);
+          }, 2000);
+        } else {
+          throw new Error(data.message || "Something went wrong.");
+        }
+      } catch (error) {
+        // Error State
+        console.error(error);
+        btn.innerHTML = '<span>Error Sending</span>';
+        btn.classList.remove('opacity-75', 'cursor-not-allowed');
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          lucide.createIcons();
+        }, 3000);
+      }
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>
